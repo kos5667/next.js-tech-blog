@@ -3,4 +3,6 @@
 
 
 ### Tech Stack
-Next.js, Typescript
+Next.js, 
+Typescript
+[contentlayer](https://github.com/contentlayerdev/contentlayer?tab=readme-ov-file)
