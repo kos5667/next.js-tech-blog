@@ -1,2 +1,6 @@
 # next.js-tech-blog
-Next.js를 이용한 기술 블로그
+블로그 Ruby -> Next.js로 이전 계획
+
+
+### Tech Stack
+Next.js, Typescript
