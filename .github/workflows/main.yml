@@ -6,4 +6,36 @@ on:
       - '**.md'  # md 파일 변경 시 실행
   workflow_dispatch:
 
-  
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout next.js-tech-blog repository
+        uses: actions/checkout@v3
+
+      - name: Get contents of recent markdown files
+        id: get_files
+        run: |
+          echo "## ✍ 최근 블로그 문서" > file_list.txt
+          git log --pretty=format:"%ad %h %f" --date=short -- posts/ | \
+          awk '{print $1, $3}' | uniq | head -n 5 | \
+          while read date slug; do
+            echo "- [$date] 📄 [$slug](https://github.com/${{ github.repository }}/posts/$slug.md)" >> file_list.txt
+          done
+
+      - name: Checkout profile repo
+        uses: actions/checkout@v3
+        with:
+          repository: your-username/your-username
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          path: profile
+
+      - name: Update README in profile repo
+        run: |
+          cp file_list.txt profile/README.md
+          cd profile
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add README.md
+          git commit -m "블로그 문서 목록 갱신" || echo "No changes"
+          git push
