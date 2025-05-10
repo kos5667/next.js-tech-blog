@@ -6,12 +6,15 @@
     "dev": "node_modules/.bin/next dev",
     "build": "node_modules/.bin/next build",
     "start": "node_modules/.bin/next start",
-    "lint": "node_modules/.bin/next lint"
+    "lint": "node_modules/.bin/next lint",
+
+    "build-ts": "npx tsc -p tsconfig.action.json",
+    "clean-ts": "rimraf dist"
   },
   "dependencies": {
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.13"
+    "next": "15.2.4"
   },
   "devDependencies": {
     "typescript": "^5",
