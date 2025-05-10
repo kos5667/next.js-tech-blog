@@ -1,0 +1,9 @@
+name: Push Markdown to Profile README
+
+on:
+  push:
+    paths:
+      - '**.md'  # md 파일 변경 시 실행
+  workflow_dispatch:
+
+  
