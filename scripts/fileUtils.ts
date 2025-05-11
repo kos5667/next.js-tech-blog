@@ -1,64 +1,67 @@
 import * as fs from 'fs';
 
-type PostType = {
-    date: string;
-    filename: string;
-    folder: string;
+export type PostMeta = {
     title: string;
-    tags: string[];
+    description?: string;
     categories: string;
+    tags?: string[];
+    allow_publishing: boolean;
 }
 
+/**
+ * 파일명에서 일자, 파일명, 카테고리 추출
+ * @param category
+ * @param filename
+ */
 export function parsePostFilename(category: string, filename: string): any {
     const match = filename.match(/^(\d{4}-\d{2}-\d{2})-(.+)\.md$/);
     if (!match) return null;
 
     const [, date, title] = match;
 
-    return {
-        date,
-        filename,
-        categories: category,
-    };
+    return { date, filename, category };
 }
 
 /**
  * 주석 추출
  * @param pathToFile
  */
-export function getMetadataFromMarkdown(pathToFile: string) {
+export function getMetadataFromMarkdown(pathToFile: string) : PostMeta | null {
     const content = fs.readFileSync(pathToFile, 'utf-8');
-    return parseFrontMatterFromComment(content);
-}
 
-function parseFrontMatterFromComment(content: string): Record<string, any> {
     const commentMatch = content.match(/<!--([\s\S]*?)-->/);
-    if (!commentMatch) return {};
+    if (!commentMatch) return null;
 
     const lines = commentMatch[1]
         .split('\n')
         .map(line => line.trim())
         .filter(line => line.length > 0);
 
-    const metadata: Record<string, any> = {};
+    const metadata: PostMeta = {
+        title: '',
+        categories: '',
+        tags: [],
+        allow_publishing: false
+    };
 
     for (const line of lines) {
         const [key, ...rest] = line.split(':');
-        if (!key || rest.length === 0) continue;
+        const keyName = key.trim() as keyof PostMeta;
+        const keyValue = rest.join(':').trim();
 
-        const value = rest.join(':').trim();
+        if (!keyName || keyValue.length === 0) continue;
+        if (!(keyName in metadata)) continue;
 
-        // 배열 형태인지 확인 (예: [A, B])
-        if (value.startsWith('[') && value.endsWith(']')) {
-            metadata[key.trim()] = value
-                .slice(1, -1)
-                .split(',')
-                .map(item => item.trim());
+        if (keyName === 'tags') {
+            metadata[keyName] = keyValue.split(',').map(tag => tag.trim());
+        } else if (keyName === 'allow_publishing') {
+            metadata[keyName] = keyValue === 'true';
         } else {
-            metadata[key.trim()] = value;
+            metadata[keyName] = keyValue as any;
         }
     }
 
+    if (!metadata.allow_publishing) return null;
     return metadata;
 }
 
