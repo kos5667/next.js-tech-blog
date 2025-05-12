@@ -31,16 +31,6 @@ jobs:
       - name: Run update profile README
         run: npx ts-node scripts/updateReadme.ts
 
-      - name: Get contents of recent markdown files
-        id: get_files
-        run: |
-          echo "## ✍ 최근 블로그 문서" > file_list.txt
-          git log --pretty=format:"%ad %h %f" --date=short -- posts/ | \
-          awk '{print $1, $3}' | uniq | head -n 5 | \
-          while read date slug; do
-            echo "- [$date] 📄 [$slug](https://github.com/${{ github.repository }}/posts/$slug.md)" >> file_list.txt
-          done
-
       - name: Update README in profile repository
         run: |
           cp profile.md README.md
