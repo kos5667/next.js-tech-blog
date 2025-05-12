@@ -1,25 +1,48 @@
 import * as fs from 'fs';
+import path from "path";
 
 export type PostMeta = {
     title: string;
     description?: string;
-    categories: string;
     tags?: string[];
     allow_publishing: boolean;
 }
 
 /**
+ * 재귀를 이용하여 directory(category)를 추출
+ * @param dir
+ * @param baseDir
+ */
+export function getCategoryFiles(dir: string, baseDir: string = dir): string[][] {
+    let results: string[][] = [];
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+
+        if (entry.isDirectory()) {
+            const relative = path.relative(baseDir, fullPath);
+            const categoryPath = relative.split(path.sep)
+
+            results.push(categoryPath)
+            results = results.concat(getCategoryFiles(fullPath, baseDir)); // 재귀 호출
+        }
+    }
+
+    return results;
+}
+
+/**
  * 파일명에서 일자, 파일명, 카테고리 추출
- * @param category
  * @param filename
  */
-export function parsePostFilename(category: string, filename: string): any {
+export function parsePostFilename(filename: string): any {
     const match = filename.match(/^(\d{4}-\d{2}-\d{2})-(.+)\.md$/);
     if (!match) return null;
 
     const [, date, title] = match;
 
-    return { date, filename, category };
+    return { date, filename };
 }
 
 /**
@@ -39,7 +62,6 @@ export function getMetadataFromMarkdown(pathToFile: string) : PostMeta | null {
 
     const metadata: PostMeta = {
         title: '',
-        categories: '',
         tags: [],
         allow_publishing: false
     };
