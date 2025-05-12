@@ -5,6 +5,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
+import * as icons from 'simple-icons';
 import { getMetadataFromMarkdown, parsePostFilename, getCategoryFiles } from './fileUtils';
 
 const postsRoot = path.join(__dirname, '..', 'posts');
@@ -21,8 +22,8 @@ function getPostContent() {
             .filter(file => file.endsWith('.md'));
 
         for (const file of files) {
-            const file_path = path.join(__dirname, '..', 'posts', categoryName, file)
-            const meta = { ...getMetadataFromMarkdown(file_path) };
+            const filePath = path.join(__dirname, '..', 'posts', categoryName, file)
+            const meta = { ...getMetadataFromMarkdown(filePath) };
 
             if (Object.keys(meta).length === 0)
                 continue;
@@ -31,29 +32,78 @@ function getPostContent() {
                 ...meta,
                 ...parsePostFilename(file),
                 category: category,
-                path: file_path,
+                path: filePath,
             });
         }
     }
-    console.log(posts);
     return posts;
 }
 
-getPostContent()
+function findIconByName(name: string) {
+    const iconList = Object.values(icons) as { title: string; hex: string; slug: string; }[];
+    return iconList.find(icon => icon.title?.toLowerCase() === name.toLowerCase());
+}
+
+function getRandomHexColor(): string {
+    return `${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')}`;
+}
 
 
+/**
+ * 최근 등록된 포스터
+ */
+function newPosts(postContents: any[]): ReturnType<typeof getPostContent> {
+    return postContents.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+}
 
-// 2025-05-07 [Java] Spring 사용법. `new`
-// 2025-05-07 [Java][SpringBoot][AOP]
+/**
+ * 최근 수정된 포스터
+ */
+function updatedPosts(): ReturnType<typeof getPostContent> | null  {
+    return null;
+}
 
-// Spring 사용법.
-// 00000000000000000000
-// aop, annotation, aspect
+/**
+ * README에 표출할 선별된 컨텐츠를 작성한다.
+ * @param posts
+ */
+function buildReadmeContents(posts: any[]): string {
+    const githubURL = 'https://github.com/kos5667/next.js-tech-blog/blob/main/posts';
+    const iconsURL = 'https://img.shields.io/badge/'
 
-// 2025-05-08 [NodeJS] express 사용법 `update`
+    let contents = '';
+    for (const post of posts) {
+        contents += `### ${post.date} [${post.title}](${path.join(githubURL, post.category.join('/'), post.filename)})\n`
 
-// title: "[백준]10986 나머지 합 풀이"
-// excerpt_image: "../assets/images/excerpt-2024-09-24-Algorithm-Backjoon-G310986.png"
-// categories: Algorithm
-// tags: [Algorithm, Java]
-// allow_publishing: true
+        if (post.description) contents += `${post.description}\n\n`
+
+        const logoColor = 'white';
+        const style = 'flat'; // Possible values: [flat, flat-square, plastic, for-the-badge, social]
+        if (post.tags.length > 0) {
+            post.tags.forEach((tag: string) => {
+                const iconName = findIconByName(tag)
+                contents += `![${tag}](${iconsURL}${tag.replace(' ', '%20')}-${iconName?.hex || getRandomHexColor()}?style=${style}&logoColor=${logoColor}&logo=${iconName?.slug})\n`
+            })
+        }
+        contents += '\n'
+    }
+    return contents;
+}
+
+/**
+ * Profile README.md 작성.
+ */
+function buildProfileReadme() {
+    let contents = fs.readFileSync(path.join('.', 'profile.md'), 'utf-8');
+
+    let postContents = getPostContent()
+
+    contents += '## 📝 New Doc\n';
+    const newPost = newPosts(postContents)
+    contents += buildReadmeContents(newPost);
+
+    postContents = postContents.filter(p => !newPost.some(post => post.filename === p.filename));
+
+    return contents
+}
+buildProfileReadme();

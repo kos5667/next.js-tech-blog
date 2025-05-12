@@ -62,6 +62,7 @@ export function getMetadataFromMarkdown(pathToFile: string) : PostMeta | null {
 
     const metadata: PostMeta = {
         title: '',
+        description: '',
         tags: [],
         allow_publishing: false
     };
