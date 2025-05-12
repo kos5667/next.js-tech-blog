@@ -104,6 +104,6 @@ function buildProfileReadme() {
     contents += buildReadmeContents(newPost);
 
     postContents = postContents.filter(p => !newPost.some(post => post.filename === p.filename));
-    fs.writeFileSync(profileReadmePath, contents, 'utf-8');
+    fs.writeFileSync(path.join('..', 'dist', 'profile.md'), contents, 'utf-8');
 }
 buildProfileReadme();
