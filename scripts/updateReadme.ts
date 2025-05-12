@@ -94,7 +94,8 @@ function buildReadmeContents(posts: any[]): string {
  * Profile README.md 작성.
  */
 function buildProfileReadme() {
-    let contents = fs.readFileSync(path.join('.', 'profile.md'), 'utf-8');
+    const profileReadmePath = path.join('.', 'profile.md');
+    let contents = fs.readFileSync(profileReadmePath, 'utf-8');
 
     let postContents = getPostContent()
 
@@ -103,7 +104,6 @@ function buildProfileReadme() {
     contents += buildReadmeContents(newPost);
 
     postContents = postContents.filter(p => !newPost.some(post => post.filename === p.filename));
-
-    return contents
+    fs.writeFileSync(profileReadmePath, contents, 'utf-8');
 }
 buildProfileReadme();

@@ -13,6 +13,24 @@ jobs:
       - name: Checkout next.js-tech-blog repository
         uses: actions/checkout@v3
 
+      - name: Checkout profile repo
+        uses: actions/checkout@v3
+        with:
+          repository: kos5667/kos5667
+          token: ${{ secrets.BLOG_TOKEN }}
+          path: profile
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run update profile README
+        run: npx ts-node scripts/updateReadme.ts
+
       - name: Get contents of recent markdown files
         id: get_files
         run: |
@@ -23,17 +41,9 @@ jobs:
             echo "- [$date] 📄 [$slug](https://github.com/${{ github.repository }}/posts/$slug.md)" >> file_list.txt
           done
 
-      - name: Checkout profile repo
-        uses: actions/checkout@v3
-        with:
-          repository: kos5667/kos5667
-          token: ${{ secrets.BLOG_TOKEN }}
-          path: profile
-
       - name: Update README in profile repository
         run: |
-          cp file_list.txt profile/README.md
-          cd profile
+          cp profile.md README.md
           git config user.name "kos5667"
           git config user.email "kos5667@gmail.com"
           git add README.md
