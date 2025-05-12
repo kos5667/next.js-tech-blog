@@ -28,8 +28,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run update profile README
-        run: npx ts-node scripts/updateReadme.ts
+      - name: Build update script
+        run: npm run build-ts
+
+      - name: Run update script
+        run: node dist/updateReadme.js
 
       - name: Update README in profile repository
         run: |
