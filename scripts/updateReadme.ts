@@ -68,12 +68,12 @@ function updatedPosts(): ReturnType<typeof getPostContent> | null  {
  * @param posts
  */
 function buildReadmeContents(posts: any[]): string {
-    const github = '/kos5667/next.js-tech-blog/blob/main/posts';
+    const github = 'https://github.com/kos5667/next.js-tech-blog/blob/main/posts';
     const iconsURL = 'https://img.shields.io/badge/'
 
     let contents = '';
     for (const post of posts) {
-        contents += `### ${post.date} [${post.title}](${path.join(github, post.category.join('/'), post.filename)})\n`
+        contents += `### ${post.date} [${post.title}](${path.posix.join(github, ...post.category, post.filename)})\n`
 
         if (post.description) contents += `${post.description}\n\n`
 
