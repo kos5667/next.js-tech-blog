@@ -42,7 +42,8 @@ jobs:
 
       - name: Update README in profile repository
         run: |
-          cp ../dist/profile.md README.md
+          cp dist/profile.md profile/README.md
+          cd profile
           git config user.name "kos5667"
           git config user.email "kos5667@gmail.com"
           git add README.md
