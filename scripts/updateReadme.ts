@@ -73,7 +73,7 @@ function buildReadmeContents(posts: any[]): string {
 
     let contents = '';
     for (const post of posts) {
-        contents += `### ${post.date} [${post.title}](${path.posix.join(github, ...post.category, post.filename)})\n`
+        contents += `### ${post.date} [${post.title}](${github}/${post.category.join('/')}/${post.filename})\n`
 
         if (post.description) contents += `${post.description}\n\n`
 
