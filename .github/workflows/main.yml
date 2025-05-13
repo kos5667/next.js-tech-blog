@@ -34,12 +34,15 @@ jobs:
       - name: Copy Temp profile
         run: cp scripts/profile.md dist/
 
+      - name: Debug dist contents
+        run: ls -al dist
+
       - name: Run update script
         run: node dist/updateReadme.js
 
       - name: Update README in profile repository
         run: |
-          cp profile.md README.md
+          cp ../dist/profile.md README.md
           git config user.name "kos5667"
           git config user.email "kos5667@gmail.com"
           git add README.md
