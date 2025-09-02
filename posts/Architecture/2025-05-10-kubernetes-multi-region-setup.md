@@ -34,3 +34,17 @@ allow_publishing: false
 
 
 
+---
+
+## 개선된 구조
+### 주요 변경 사항
+
+1. Region 종속 Service 제거
+   - 리전별 Service 대신 중립 Service를 생성
+   - Service는 Cluster 내 네트워크 라우팅만 담당하므로, 특정 리전에 묶이지 않음 
+2. Ingress 트래픽 2차 제어
+   - GSLB가 차등 분배를 하더라도, Ingress(nginx) 단계에서 올바른 Pod로 트래픽을 분배하도록 변경
+3. Service 동작 방식 최적화
+   - Service 자체는 트래픽을 직접 전달하지 않고, 라우팅 규칙을 정의하는 역할 
+   - kube-proxy 또는 Cilium이 해당 규칙에 따라 실제 트래픽을 적절한 Pod로 전달 
+   - Pod가 다른 리전에 있더라도, Node 간 직접 통신을 통해 트래픽 전달 가능
