@@ -48,3 +48,16 @@ allow_publishing: false
    - Service 자체는 트래픽을 직접 전달하지 않고, 라우팅 규칙을 정의하는 역할 
    - kube-proxy 또는 Cilium이 해당 규칙에 따라 실제 트래픽을 적절한 Pod로 전달 
    - Pod가 다른 리전에 있더라도, Node 간 직접 통신을 통해 트래픽 전달 가능
+
+
+[//]: # (&#40;이미지 첨부 예정..&#41;)
+장애 발생 시 처리 흐름
+Backend Pod 장애 → Ingress가 트래픽을 차단
+Client Pod 장애 → Ingress에서 연결 차단
+Region Pod 장애 → GSLB에서 해당 리전 트래픽 차단
+
+
+### 네트워크 구성 요소
+> Cilium VXLAN 터널링
+> tunnel: vxlan 설정을 통해 모든 노드 간 네트워크 터널 자동 구성
+> 서로 다른 리전의 Node 간에도 안정적으로 트래픽 전달 가능
