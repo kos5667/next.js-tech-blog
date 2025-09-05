@@ -1,0 +1,25 @@
+#name: Create Issue from Markdown
+#
+#on:
+#  push:
+#    paths:
+#      - 'posts/**.md'  # md 파일 변경 시 실행
+#
+#jobs:
+#  update-readme:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: 20
+#
+#      - name: Install dependencies
+#        run: npm install
+#
+#      - name: Build update script
+#        run: npm run build-ts
+#
+#
