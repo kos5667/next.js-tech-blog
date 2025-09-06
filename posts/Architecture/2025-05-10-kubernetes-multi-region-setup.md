@@ -4,10 +4,12 @@ tags: k8s,Architecture,node.js
 allow_publishing: false
 -->
 
-## outline
+## Outline
 최근 담당하는 채팅 서비스는 [**Multi IDC 환경을 도입**](#)했지만, 특정 상황에서 DNS 캐싱으로 Region에 트래픽이 고정되어 연결 지연 문제가 발생했습니다. 이로 인해 유저가 사용자에게 연결될 때 최대 6~10분의 지연이 발생할 수 있었으며, Multi IDC의 장점을 충분히 살리지 못하는 상황이 발생하였습니다. 이를 개선하기 위해 Kubernetes(K8s) 구성 변경을 진행하였습니다.
 
-## 변경 전 k8s 구성
+## GSLB 분배 정책으로 발생하는 트래픽 쏠림 현상
+
+### 변경 전 k8s 구성
 
 > 각각의 Backend Pods에는 사용자가 접속되어 있음.
 
@@ -18,6 +20,15 @@ allow_publishing: false
 ![GSLB 트래픽 분배 정책](../../static/images/architecture/kubernetes-multi-region-setup-2.png)
 
 위 이미지와 같이 GSLB는 동일한 비율로 분배하는 **균등 분배**가 아닌, 한 Region에 집중적으로 트래픽을 보낸 후, 일정 구간이 지나면 다른 리전에 분배하는 **차등 분배**를 하고 있다.
+
+#### 특징
+- Region별로 Service와 Ingress가 독립적으로 구성됨
+- GSLB는 트래픽을 차등 분배 방식으로 전달
+   - 예: 일정 구간 동안 한 리전에 집중 후, 다른 리전으로 분배
+
+#### 문제점
+- 사용자가 최초 접속 시 특정 리전에 할당되면, 재연결도 해당 리전으로 이루어져야 원활한 연결 가능
+- 하지만 트래픽이 다른 리전으로 분산될 경우, Pod 탐색 과정에서 불필요한 지연이 발생
 
 > [!IMPORTANT]
 >
@@ -30,19 +41,21 @@ allow_publishing: false
 
 ## 내부 구성도를 변경하여 GSLB 트래픽 분배 방식 제어
 
+### 변경 후 k8s 구성도
 
+![변경 후 k8s 구성도](../../static/images/architecture/kubernetes-multi-region-setup-3.png)
 
+> 차등분배로 들어오더라도 적절한 endpoint에 도달 할 수 있도록 Ingress에서 트래픽 2차 제어.
 
+### 구성도 변화에 따른 트래픽 흐름.
 
+![구성도 변화에 따른 트래픽 흐름](../../static/images/architecture/kubernetes-multi-region-setup-4.png)
 
-#### 특징
- - Region별로 Service와 Ingress가 독립적으로 구성됨
- - GSLB는 트래픽을 차등 분배 방식으로 전달 
-   - 예: 일정 구간 동안 한 리전에 집중 후, 다른 리전으로 분배
+nginx를 이용하여, 요청 유형에 따른 트래픽을 적절하게 분배.
+API 요청은 -> Server
+화면 요청은 -> Client
+메지시 수신은 -> Message Queue Server Consume
 
-#### 문제점
- - 사용자가 최초 접속 시 특정 리전에 할당되면, 재연결도 해당 리전으로 이루어져야 원활한 연결 가능 
- - 하지만 트래픽이 다른 리전으로 분산될 경우, Pod 탐색 과정에서 불필요한 지연이 발생
 
 ---
 
